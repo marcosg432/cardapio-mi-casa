@@ -51,13 +51,22 @@ export default function EditBeverage() {
     setSaving(true);
 
     try {
+      // Preparar valores com type assertion para evitar erro de TypeScript
+      const priceValue = typeof formData.price === 'string' 
+        ? Number(formData.price.replace(',', '.')) 
+        : (typeof formData.price === 'number' ? formData.price : 0);
+      
+      const displayOrderValue = typeof formData.display_order === 'string' 
+        ? Number(formData.display_order) 
+        : (typeof formData.display_order === 'number' ? formData.display_order : 0);
+
       const res = await fetch(`/api/beverages/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          price: typeof formData.price === 'string' ? Number(formData.price.replace(',', '.')) : (typeof formData.price === 'number' ? formData.price : 0),
-          display_order: typeof formData.display_order === 'string' ? Number(formData.display_order) : (typeof formData.display_order === 'number' ? formData.display_order : 0),
+          price: priceValue,
+          display_order: displayOrderValue,
           category_id: formData.category_id || null,
         }),
       });
