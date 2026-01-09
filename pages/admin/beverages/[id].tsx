@@ -56,8 +56,8 @@ export default function EditBeverage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          price: typeof formData.price === 'string' ? Number(formData.price.replace(',', '.')) : (formData.price || 0),
-          display_order: typeof formData.display_order === 'string' ? Number(formData.display_order) : (formData.display_order || 0),
+          price: typeof formData.price === 'string' ? Number(formData.price.replace(',', '.')) : (typeof formData.price === 'number' ? formData.price : 0),
+          display_order: typeof formData.display_order === 'string' ? Number(formData.display_order) : (typeof formData.display_order === 'number' ? formData.display_order : 0),
           category_id: formData.category_id || null,
         }),
       });
