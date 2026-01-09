@@ -152,7 +152,7 @@ export default function EditBeverage() {
             <label>Valor (R$)</label>
             <input
               type="text"
-              value={formData.price === 0 ? '' : (typeof formData.price === 'number' ? formData.price.toFixed(2).replace('.', ',') : formData.price)}
+              value={formData.price === 0 ? '' : (typeof formData.price === 'number' ? (formData.price as number).toFixed(2).replace('.', ',') : formData.price)}
               onChange={(e) => {
                 const value = e.target.value;
                 setFormData({ ...formData, price: value === '' ? 0 : (value as any) });
