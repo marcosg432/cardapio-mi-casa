@@ -23,6 +23,7 @@ export default function EditDish() {
     if (router.isReady && id) {
       loadDish();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.isReady, id]);
 
   const loadDish = async () => {

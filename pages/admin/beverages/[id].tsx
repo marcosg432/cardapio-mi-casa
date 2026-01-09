@@ -22,6 +22,7 @@ export default function EditBeverage() {
     if (router.isReady && id) {
       loadBeverage();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.isReady, id]);
 
   const loadBeverage = async () => {
