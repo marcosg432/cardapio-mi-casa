@@ -53,11 +53,11 @@ export default function EditBeverage() {
     try {
       // Preparar valores com type assertion para evitar erro de TypeScript
       const priceValue = typeof formData.price === 'string' 
-        ? Number(formData.price.replace(',', '.')) 
+        ? Number((formData.price as string).replace(',', '.')) 
         : (typeof formData.price === 'number' ? formData.price : 0);
       
       const displayOrderValue = typeof formData.display_order === 'string' 
-        ? Number(formData.display_order) 
+        ? Number(formData.display_order as string) 
         : (typeof formData.display_order === 'number' ? formData.display_order : 0);
 
       const res = await fetch(`/api/beverages/${id}`, {
