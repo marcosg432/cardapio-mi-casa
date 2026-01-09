@@ -46,24 +46,46 @@ export default function PratoPage() {
       const dishId = Array.isArray(id) ? id[0] : id;
       console.log('Carregando prato com ID:', dishId);
       
-      const res = await fetch(`/api/dishes/${dishId}`);
+      // Adicionar timeout para evitar loading infinito
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
       
-      if (res.ok) {
-        const data = await res.json();
-        console.log('Dados do prato carregados:', data);
-        if (data && data.id) {
-          setDish(data);
+      try {
+        const res = await fetch(`/api/dishes/${dishId}`, {
+          signal: controller.signal,
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (res.ok) {
+          const data = await res.json();
+          console.log('Dados do prato carregados:', data);
+          if (data && (data.id || data.name)) {
+            setDish(data);
+          } else {
+            console.error('Dados inválidos recebidos:', data);
+            setError('Prato não encontrado ou dados inválidos');
+          }
         } else {
-          setError('Prato não encontrado');
+          const errorText = await res.text();
+          console.error('Erro ao carregar prato: Resposta não OK', res.status, errorText);
+          setError(`Erro ao carregar prato (${res.status})`);
         }
-      } else {
-        const errorText = await res.text();
-        console.error('Erro ao carregar prato: Resposta não OK', res.status, errorText);
-        setError(`Erro ao carregar prato (${res.status})`);
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') {
+          console.error('Timeout ao carregar prato');
+          setError('Tempo limite excedido ao carregar prato');
+        } else {
+          throw fetchError;
+        }
       }
     } catch (error: any) {
       console.error('Erro ao carregar prato:', error);
-      setError('Erro ao conectar com o servidor');
+      setError(`Erro ao conectar com o servidor: ${error.message || 'Erro desconhecido'}`);
     } finally {
       setLoading(false);
     }
