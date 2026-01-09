@@ -155,7 +155,7 @@ export default function EditBeverage() {
               value={formData.price === 0 ? '' : (typeof formData.price === 'number' ? formData.price.toFixed(2).replace('.', ',') : formData.price)}
               onChange={(e) => {
                 const value = e.target.value;
-                setFormData({ ...formData, price: value === '' ? 0 : value });
+                setFormData({ ...formData, price: value === '' ? 0 : (value as any) });
               }}
               onBlur={(e) => {
                 const value = e.target.value;

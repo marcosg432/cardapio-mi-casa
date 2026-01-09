@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Script para corrigir erro de tipo no onChange
+# Execute: bash corrigir-tipo-onchange.sh
+
+FILE="pages/admin/beverages/[id].tsx"
+
+echo "🔧 Corrigindo erro de tipo no onChange..."
+
+if [ ! -f "$FILE" ]; then
+    echo "❌ Arquivo não encontrado: $FILE"
+    exit 1
+fi
+
+# Fazer backup
+cp "$FILE" "${FILE}.backup.$(date +%Y%m%d_%H%M%S)"
+echo "✅ Backup criado"
+
+# Corrigir usando sed
+# Substituir: price: value === '' ? 0 : value
+# Por: price: value === '' ? 0 : (value as any)
+sed -i "s/price: value === '' ? 0 : value/price: value === '' ? 0 : (value as any)/g" "$FILE"
+
+# Verificar se há display_order com o mesmo problema
+if grep -q "display_order: value === '' ? 0 : value" "$FILE"; then
+    sed -i "s/display_order: value === '' ? 0 : value/display_order: value === '' ? 0 : (value as any)/g" "$FILE"
+fi
+
+echo ""
+echo "📋 Verificando correção:"
+grep -n "price: value === '' ? 0 : (value as any)" "$FILE" | head -1
+
+if [ $? -eq 0 ]; then
+    echo "✅ Correção aplicada com sucesso!"
+else
+    echo "⚠️  Verifique se a correção foi aplicada"
+fi
+
+echo ""
+echo "✅ Processo concluído!"
+
