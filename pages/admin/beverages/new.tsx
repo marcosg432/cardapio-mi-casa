@@ -94,7 +94,7 @@ export default function NewBeverage() {
             <label>Valor (R$) *</label>
             <input
               type="text"
-              value={formData.price === '' ? '' : (typeof formData.price === 'string' && formData.price !== '' ? formData.price : (typeof formData.price === 'number' ? formData.price.toFixed(2).replace('.', ',') : ''))}
+              value={formData.price === '' ? '' : (typeof formData.price === 'string' && formData.price !== '' ? formData.price : (typeof formData.price === 'number' ? (formData.price as number).toFixed(2).replace('.', ',') : ''))}
               onChange={(e) => setFormData({ ...formData, price: e.target.value })}
               onBlur={(e) => {
                 const value = e.target.value;
