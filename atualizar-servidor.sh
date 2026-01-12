@@ -1,68 +1,41 @@
 #!/bin/bash
 
-# Script para forçar atualização completa no servidor
-# Execute este script no servidor após fazer git pull
+# Script para atualizar o servidor na Hostinger
+# Execute: bash atualizar-servidor.sh
 
-set -e
+set -e  # Para o script se houver erro
 
-echo "🔄 Forçando atualização completa do repositório..."
+echo "🚀 Iniciando atualização do servidor..."
 
-# Verificar se está no diretório correto
-if [ ! -f "package.json" ]; then
-    echo "❌ Erro: Execute este script no diretório do projeto (/root/cardapio)"
-    exit 1
-fi
+# Ir para o diretório do projeto
+cd /root/cardapio || exit 1
 
-# Fazer backup do estado atual
-echo "📦 Fazendo backup..."
-git stash
-
-# Forçar reset para o estado do repositório remoto
-echo "🔄 Resetando para o estado do repositório remoto..."
-git fetch origin
+echo "📥 Atualizando código do GitHub..."
+git fetch --all --prune
 git reset --hard origin/main
+git pull origin main
 
-# Verificar se os arquivos de configuração existem
-echo "✅ Verificando arquivos de configuração..."
-if [ ! -f "ecosystem.config.js" ]; then
-    echo "❌ ecosystem.config.js não encontrado após git pull"
-    echo "📥 Baixando novamente do repositório..."
-    git checkout origin/main -- ecosystem.config.js
-fi
+echo "📦 Instalando dependências..."
+npm install
 
-if [ ! -f "server.js" ]; then
-    echo "❌ server.js não encontrado após git pull"
-    echo "📥 Baixando novamente do repositório..."
-    git checkout origin/main -- server.js
-fi
+echo "🔨 Fazendo build do projeto..."
+rm -rf .next
+npm run build
 
-if [ ! -f "deploy.sh" ]; then
-    echo "❌ deploy.sh não encontrado após git pull"
-    echo "📥 Baixando novamente do repositório..."
-    git checkout origin/main -- deploy.sh
-    chmod +x deploy.sh
-fi
+echo "🔄 Reiniciando aplicação no PM2..."
+pm2 stop cardapio-3007 || true
+pm2 delete cardapio-3007 || true
+pm2 start ecosystem.config.js
+pm2 save
 
-# Verificar se o arquivo beverages/[id].tsx foi atualizado
-echo "🔍 Verificando correção do TypeScript..."
-if grep -q "typeof formData.price === 'number' ? formData.price : 0" "pages/admin/beverages/[id].tsx"; then
-    echo "✅ Correção do TypeScript encontrada"
-else
-    echo "⚠️  Correção do TypeScript não encontrada. Aplicando correção manual..."
-    # Aplicar correção manual
-    sed -i "s/price: typeof formData\.price === 'string'? Number(formData\.price\.replace(',', '.')) : (formData\.price || 0),/price: typeof formData.price === 'string' ? Number(formData.price.replace(',', '.')) : (typeof formData.price === 'number' ? formData.price : 0),/g" "pages/admin/beverages/[id].tsx"
-    sed -i "s/display_order: typeof formData\.display_order === 'string'? Number(formData\.display_order) : (formData\.display_order || 0),/display_order: typeof formData.display_order === 'string' ? Number(formData.display_order) : (typeof formData.display_order === 'number' ? formData.display_order : 0),/g" "pages/admin/beverages/[id].tsx"
-    echo "✅ Correção aplicada"
-fi
-
-echo ""
 echo "✅ Atualização concluída!"
-echo "📋 Arquivos verificados:"
-ls -la ecosystem.config.js server.js deploy.sh 2>/dev/null || echo "⚠️  Alguns arquivos ainda não foram encontrados"
+echo ""
+echo "📊 Status do PM2:"
+pm2 status
 
 echo ""
-echo "🚀 Próximos passos:"
-echo "   1. Execute: npm install --production"
-echo "   2. Execute: npm run build"
-echo "   3. Execute: ./deploy.sh"
+echo "📝 Últimos logs (últimas 20 linhas):"
+pm2 logs cardapio-3007 --lines 20 --nostream
 
+echo ""
+echo "🌐 Aplicação rodando em: http://193.160.119.67:3007"
