@@ -50,4 +50,3 @@ pm2 logs cardapio-3007 --lines 30 --nostream
 
 echo ""
 echo "✅ Processo concluído!"
-
